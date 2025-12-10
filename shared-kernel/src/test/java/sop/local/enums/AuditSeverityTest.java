@@ -1,6 +1,7 @@
 package sop.local.enums;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
@@ -19,5 +20,23 @@ public class AuditSeverityTest {
         );
         assertEquals(expected, List.of(AuditSeverity.values()), 
         "Enum constants changed (added/removed/reordered). Review callers and update test if intentional.");
+    }
+    @Test
+    void testFromStringValidInputs() {
+        assertEquals(AuditSeverity.INFO, AuditSeverity.fromString("info"));
+        assertEquals(AuditSeverity.WARNING, AuditSeverity.fromString("warning"));
+        assertEquals(AuditSeverity.ERROR, AuditSeverity.fromString(" error "));
+    }
+
+    @Test
+    void testFromStringInvalidInput() {
+        assertThrows(IllegalStateException.class, 
+            () -> AuditSeverity.fromString("INVALID"));
+    }
+
+    @Test
+    void testFromStringNullInput() {
+        assertThrows(IllegalArgumentException.class, 
+            () -> AuditSeverity.fromString(null));
     }
 }
