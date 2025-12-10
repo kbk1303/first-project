@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+          <groupId>sop.local</groupId>
+          <artifactId>first-project</artifactId>
+          <version>${revision}</version>
+          <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <artifactId>auditlog-impl</artifactId>
+    <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>sop.local</groupId>
+            <artifactId>auditlog-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <start-class>sop.local.auditlog.AuditlogApplicationStart</start-class>
+    </properties>
+    
+    <build>
+        <plugins>
+            <!-- activate flatten-plugin, config/vers. from parent -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <!-- Create an executable Spring Boot jar -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                 <version>${spring-boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!-- (Optional) if auto-detection fails, use the start-class property -->
+                <configuration>
+                <mainClass>${start-class}</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+  </build>
+
+</project>

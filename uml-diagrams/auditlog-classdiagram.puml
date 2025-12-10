@@ -1,0 +1,104 @@
+@startuml Auditlog - Classdiagram
+top to bottom direction
+title Auditlog - Classdiagram - IMPLEMENTATION
+skinparam packageStyle rectangle
+skinparam Shadowing false
+skinparam classFontSize 12
+skinparam classFontName Arial
+skinparam WrapWidth 260
+skinparam ComponentStyle uml2
+
+package "sop.local.auditlog" {
+    package "domain" #Red {
+        package "model" {
+            ' invariants:
+            ' Auditlog must have a unique AuditKey.
+            ' Auditlog cannot be updated after creation
+            ' All fields require not null
+            ' All fields must be immutable
+            ' Auditlog must have a timestamp
+            ' Auditlog must have an actor (userId)
+            ' Auditlog must have a severity level
+            ' Auditlog must contain a description of the action performed
+            ' AuditKey, TargetKey must be a valid Unilogin Identifier
+
+            ' Value Objects:
+                ' AuditKey
+                ' Description
+                ' Timestamp
+                ' SeverityLevel
+
+                class AuditKey <<ValueObject>> {
+                    - id: String
+                    + getId(): String
+                }
+
+                class Description <<ValueObject>> {
+                    - text: String
+                    + getText(): String
+                }
+
+                class Timestamp <<ValueObject>> {
+                    - timeStamp: Timestamp
+                    + getTimeStamp(): TimeStamp
+                }
+
+                enum SeverityLevel <<Enum>> {
+                    + INFO
+                    + WARNING
+                    + ERROR
+                }
+
+
+                note bottom of AuditKey
+                    Invariants: 
+                    Unique, 
+                    Valid, 
+                    Immutable, 
+                    Not Null, 
+                    Unilogin
+                end note
+
+                note bottom of Description
+                    Invariants: 
+                    Non-empty, 
+                    Immutable, 
+                    Not Null
+                end note
+
+                note bottom of Timestamp
+                    Invariants: 
+                    Immutable, 
+                    Not Null
+                end note
+
+                note bottom of SeverityLevel
+                    Invariants: 
+                    Immutable, 
+                    Not Null
+                end note
+
+            ' Aggregate Root:
+                class Auditlog <<AggregateRoot>> {
+                    - auditKey: AuditKey
+                    - timestamp: Timestamp
+                    - severityLevel: SeverityLevel
+                    - description: Description
+                    + getAuditKey(): AuditKey
+                    + getTimestamp(): Timestamp
+                    + getSeverityLevel(): SeverityLevel
+                    + getDescription(): Description
+                }
+
+                Auditlog "1" *-- "n" AuditKey : has >
+                Auditlog "1" *-- "1" Timestamp : has >
+                Auditlog "1" *-- "1" SeverityLevel : has >
+                Auditlog "1" *-- "1" Description : has >
+
+        }
+    }
+}
+        
+
+
+@enduml

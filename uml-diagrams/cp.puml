@@ -1,0 +1,40 @@
+left to right direction
+allow_mixing
+title Auditlog - Class Diagram
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classFontSize 12
+skinparam classFontName Arial
+skinparam WrapWidth 260
+hide circle
+hide empty methods
+hide empty attributes
+
+package "sop.local.auditlog.domain.model" {
+
+    class AuditKey {
+        - id: Long
+        + getId(): Long
+    }
+
+    class Action {
+        - name: String
+        + getName(): String
+    }
+
+    class Auditlog {
+        - id: Long
+        - action: String
+        - timestamp: Date
+        - userId: Long
+        + getId(): Long
+        + getAction(): String
+        + getTimestamp(): Date
+        + getUserId(): Long
+    }
+
+    AuditKey --* Auditlog : identifies
+    Action --* Auditlog : performed in
+
+
+}

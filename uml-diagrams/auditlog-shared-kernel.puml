@@ -1,0 +1,206 @@
+@startuml Auditlog - Classdiagram
+top to bottom direction
+title BC - Auditlog - Classdiagram - IMPLEMENTATION (Domain uses Shared Kernel)
+skinparam packageStyle rectangle
+skinparam Shadowing false
+skinparam classFontSize 12
+skinparam classFontName Arial
+skinparam WrapWidth 260
+skinparam ComponentStyle uml2
+
+' Legend / color semantics
+legend left
+  <b>Colors / stereotypes</b>
+  <&folder> Red = Domain (BC-Auditlog impl) 
+  <&folder> LightBlue = Shared Kernel (cross-BC stable types)
+  «AggregateRoot», «ValueObject», «Enum» as in DDD
+endlegend
+
+' ===================== SHARED KERNEL =====================
+folder "Shared Kernel" #LightBlue{
+
+    package "sop.local"  {
+        package "enums" {
+            enum AuditSeverity <<Enum>> {
+                + INFO
+                + WARNING
+                + ERROR
+            }
+        }
+        package "valueobjects" {
+          package "utils" {
+            static class UUIDUtil <<Utility>> {
+              + generateUUID(): UUID
+              + parseRequired(idString: String): UUID
+              + require(id: UUID): UUID
+            }
+          }
+
+          interface DomainId {
+            + value(): UUID
+          }
+
+        }
+        
+
+        note bottom of AuditSeverity
+            Stable, cross-BC enum.
+            No framework dependencies.
+        end note
+    }
+}
+
+folder "BC - Auditlog - Implementation (auditlog-impl)" #LightGreen {
+
+
+  ' ===================== AUDITLOG DOMAIN (IMPL) =====================
+  package "sop.local.auditlog" {
+    package "domain" #LightCoral {
+      package "model" {
+
+        ' invariants:
+        ' Auditlog must have a unique AuditlogId.
+        ' Auditlog must be a valid UserIdentifier.
+        ' Auditlog cannot be updated after creation
+        ' All fields require not null
+        ' All fields must be immutable
+        ' Auditlog must have a timestamp
+        ' Auditlog must have a severity level
+        ' Auditlog must contain a description of the action performed
+
+        ' Value Objects:
+        '  AuditlogId, UserIdentifier, Description, Timestamp, <<enum>> AuditSeverity
+
+        class AuditlogId <<ValueObject>> {
+          - id: UUID
+          + getId(): UUID
+        }
+        
+        class UserIdentifier <<ValueObject>> {
+          - id: String
+          + getId(): String
+        }
+
+        class Description <<ValueObject>> {
+          - text: String
+          + getText(): String
+        }
+
+        class Timestamp <<ValueObject>> {
+          - value: java.time.Instant
+          + getValue(): java.time.Instant
+        }
+
+        note bottom of AuditlogId
+          Invariants:
+          Unique,
+          Valid,
+          Immutable,
+          Not Null
+        end note
+
+        note bottom of UserIdentifier
+          Invariants:
+          Valid,
+          Immutable,
+          Non-empty,
+          Not Null,
+          Unilogin
+        end note
+
+        note bottom of Description
+          Invariants:
+          Non-empty,
+          Immutable,
+          Not Null
+        end note
+
+        note bottom of Timestamp
+          Invariants:
+          Immutable,
+          Not Null
+        end note
+
+        ' Aggregate Root:
+        class Auditlog <<AggregateRoot>> {
+          - auditlogId: AuditlogId
+          - userIdentifier: UserIdentifier
+          - timestamp: Timestamp
+          - severity: AuditSeverity
+          - description: Description
+          + getAuditlogId(): AuditlogId
+          + getUserIdentifier(): UserIdentifier
+          + getTimestamp(): Timestamp
+          + getSeverity(): AuditSeverity
+          + getDescription(): Description
+        }
+      }
+
+      package "service" {
+        interface AuditlogDomain {
+          +createAuditlog(String userIdentifier, AuditSeverity severity, String description): Auditlog
+        }
+        class AuditlogDomainService {
+          +createAuditlog(String userIdentifier, AuditSeverity severity): Auditlog
+        }
+        AuditlogDomainService "1" <.. "1" AuditlogDomain
+
+        class AuditlogConfig <<Configuration>> {
+          auditlogDomain(): AuditlogDomain
+        }
+      }
+
+      Auditlog "1" *-- "1" AuditlogId : has >
+      Auditlog "1" *-- "1" UserIdentifier : has >
+      Auditlog "1" *-- "1" Timestamp : has >
+      Auditlog "1" *-- "1" Description : has >
+      ' Enum comes from shared kernel (no composition diamond here)
+      Auditlog ..> AuditSeverity : uses
+
+      
+
+
+    }
+
+    package "application.api" {
+      package "dto" {
+        class CreateAuditlogCmd <<DTO>> {
+          -userIdentifier: String
+          -auditSeverity: AuditSeverity
+          +userIdentifier(): String
+          +auditSeverity(): AuditSeverity
+        }
+
+          class CreatedAuditlogResult <<DTO>> {
+          -id : UUID
+          +id(): UUID
+        }
+
+        class ReadAuditlogByIdQuery <<DTO>> {
+          -id : UUID
+          +id(): UUID
+        }
+
+        class ReadAuditlogByUserIdentifierQuery <<DTO>> {
+          -userIdentifier : String
+          +userIdentifier(): String
+        }
+
+        class AuditlogResponse <<DTO>> {
+          -id: UUID
+
+        }
+
+        CreateAuditlogCmd "1" ..> "1" AuditSeverity : uses
+      }
+      interface AuditlogDirectory {
+        +createAuditlog(CreateAuditlogCmd cmd) : CreatedAuditlogResult
+        +findById(ReadAuditlogByIdQuery query): AuditlogResponse
+
+      }
+
+    }
+  }
+}
+
+@enduml

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+          <groupId>sop.local</groupId>
+          <artifactId>first-project</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+          <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>coverage-report</artifactId>
+    <packaging>pom</packaging>
+    <name>Coverage Aggregate Report</name>
+
+  <!-- This module exists ONLY to aggregate coverage across bounded contexts -->
+  <dependencies>
+    <dependency>
+        <groupId>sop.local</groupId>
+        <artifactId>auditlog-api</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>sop.local</groupId>
+        <artifactId>auditlog-impl</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>sop.local</groupId>
+        <artifactId>shared-kernel</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- activate flatten-plugin, config/vers. from parent -->
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
+    <!-- Disable enforcer ONLY for this module -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-enforcer-plugin</artifactId>
+      <version>${enforcer.version}</version>
+      <configuration>
+        <skip>true</skip>
+      </configuration>
+    </plugin>
+      <!-- Only aggregate here – no agents  -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+            <configuration>
+              <!--Use the per-module merged.exec, already generated -->
+              <dataFileIncludes>
+                <dataFileInclude>**/target/jacoco-output/merged.exec</dataFileInclude>
+              </dataFileIncludes>
+
+              <outputDirectory>
+                ${project.reporting.outputDirectory}/jacoco-aggregate
+              </outputDirectory>
+
+              <!-- don't show the coverage-report-module  -->
+              <includeCurrentProject>false</includeCurrentProject>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
