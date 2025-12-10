@@ -1,5 +1,6 @@
 package sop.local.auditlog.application.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,14 +29,30 @@ import sop.local.enums.AuditSeverity;
 public class AuditlogApplicationService implements AuditlogDirectory {
 
     private final AuditlogDomain domain;
+    List<AuditlogResponse> resps;
 
     AuditlogApplicationService(AuditlogDomain domain) {
         this.domain = domain;
+        resps = new ArrayList<>(List.of(
+                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.INFO),
+                new AuditlogResponse(UUID.randomUUID(), "INESA", AuditSeverity.WARNING),
+                new AuditlogResponse(UUID.randomUUID(), "BENJ0568", AuditSeverity.ERROR),
+                new AuditlogResponse(UUID.randomUUID(), "NOAH007R", AuditSeverity.INFO),
+                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.ERROR),
+                new AuditlogResponse(UUID.randomUUID(), "BENJ0867F", AuditSeverity.INFO),
+                new AuditlogResponse(UUID.randomUUID(), "INESA", AuditSeverity.WARNING),
+                new AuditlogResponse(UUID.randomUUID(), "ARNE", AuditSeverity.INFO),
+                new AuditlogResponse(UUID.randomUUID(), "KRIK4343", AuditSeverity.INFO),
+                new AuditlogResponse(UUID.randomUUID(), "REREWW222", AuditSeverity.WARNING),
+                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.ERROR),
+                new AuditlogResponse(UUID.randomUUID(), "OLE3425D", AuditSeverity.INFO)));
     }
 
     @Override
     public CreatedAuditlogResult createAuditlog(CreateAuditlogCmd cmd) {
        Auditlog log = domain.createAuditlog(new UserIdentifier(cmd.userIdentifier()), cmd.severity());
+       //System.out.println("Created auditlog: " + log.getAuditlogId().value() + ", userIdentifier: " + log.getUserIdentifier().value() + ", severity: " + log.getSeverity());
+       resps.add(new AuditlogResponse(log.getAuditlogId().value(), log.getUserIdentifier().value(), log.getSeverity()));
 
        /* @TODO persistence missing*/
 
@@ -46,7 +63,9 @@ public class AuditlogApplicationService implements AuditlogDirectory {
     public Optional<AuditlogResponse> findById(ReadAuditlogByIdQuery query) {
 
         /* @TODO persistence should take over */
-        Optional<AuditlogResponse> resp = Optional.ofNullable(new AuditlogResponse(UUID.fromString("9f04b436-1f40-4f2e-9c2b-3d5a8f6b9c11"), "KKRI", AuditSeverity.INFO));
+        Optional<AuditlogResponse> resp = findAll().stream()
+            .filter(r -> r.id().equals(query.id()))
+            .findFirst();
         return query.id().equals(resp.get().id()) ?  resp: Optional.empty();
     }
 
@@ -54,13 +73,8 @@ public class AuditlogApplicationService implements AuditlogDirectory {
     public List<AuditlogResponse> findByUserIdentifier(ReadAuditlogByUserIdentifierQuery query) {
         
         /* @TODO persistence should take over */
-        List<AuditlogResponse> resps = List.of(
-                new AuditlogResponse(UUID.randomUUID(), "KRIK4343", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "REREWW222", AuditSeverity.WARNING),
-                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.ERROR),
-                new AuditlogResponse(UUID.randomUUID(), "OLE3425D", AuditSeverity.INFO));
                 
-                return resps.stream().filter(r -> r.userIdentifier().equals(query.userIdentifier())).toList();
+        return findAll().stream().filter(r -> r.userIdentifier().equals(query.userIdentifier())).toList();
 
     }
 
@@ -68,24 +82,30 @@ public class AuditlogApplicationService implements AuditlogDirectory {
     public List<AuditlogResponse> findByAuditSeverity(ReadAuditlogBySeverityQuery query) {
 
         /* @TODO persistence should take over */
-        List<AuditlogResponse> resps = List.of(
-                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.ERROR),
-                new AuditlogResponse(UUID.randomUUID(), "BENJ0867F", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "INESA", AuditSeverity.WARNING),
-                new AuditlogResponse(UUID.randomUUID(), "ARNE", AuditSeverity.INFO));
-                
-                return resps.stream().filter(r -> r.severity().equals(query.severity())).toList();
+               
+        return findAll().stream().filter(r -> r.severity().equals(query.severity())).toList();
     }
 
     @Override
     public List<AuditlogResponse> findAll() {
             /* @TODO persistence should take over */
-                List<AuditlogResponse> resps = List.of(
-                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "INESA", AuditSeverity.WARNING),
-                new AuditlogResponse(UUID.randomUUID(), "BENJ0568", AuditSeverity.ERROR),
-                new AuditlogResponse(UUID.randomUUID(), "NOAH007R", AuditSeverity.INFO));
-                return resps;
+            return resps;
+    }
+
+    @Override
+    public List<AuditlogResponse> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity) {
+        List<AuditlogResponse> allLogs = findAll();
+        if(id != null) {
+            return allLogs.stream().filter(r -> r.id().equals(id)).toList();
+        }
+        if(userIdentifier != null) {
+            allLogs =  allLogs.stream().filter(r -> r.userIdentifier().equals(userIdentifier)).toList();
+
+        }   
+        if(severity != null) {
+            allLogs = allLogs.stream().filter(r -> r.severity().equals(severity)).toList();
+        }
+        return allLogs;
     }
 
 }

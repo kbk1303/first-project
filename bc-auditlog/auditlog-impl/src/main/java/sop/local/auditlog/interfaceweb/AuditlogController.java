@@ -1,10 +1,12 @@
 package sop.local.auditlog.interfaceweb;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ import sop.local.auditlog.application.api.dto.AuditlogResponse;
 import sop.local.auditlog.application.api.dto.CreateAuditlogCmd;
 import sop.local.auditlog.application.api.dto.CreatedAuditlogResult;
 import sop.local.auditlog.application.api.dto.ReadAuditlogByIdQuery;
+import sop.local.enums.AuditSeverity;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,6 +51,30 @@ public class AuditlogController {
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.noContent().build());
     }
-    
 
+
+    /* public GET by parameters /api/auditlogs?id=... */
+    @GetMapping(produces="application/json")
+    public ResponseEntity<List<AuditlogResponse>> findBySearchParams(
+        @RequestParam(name="id", required = false) UUID id,
+        @RequestParam(name="userIdentifier", required = false) String userIdentifier,
+        @RequestParam(name="severity", required = false) AuditSeverity severity) 
+    {
+        if(id == null && userIdentifier == null && severity == null) {
+            return ResponseEntity.ok(directory.findAll());
+
+        }
+        else {
+            return ResponseEntity.ok(directory.findBySearchParams(id, userIdentifier, severity));
+        }
+    }
+        
 }
+    
+    /* 
+        @GetMapping(produces="application/json", params={"id", "userIdentifier", "severity"})
+    public ResponseEntity<List<AuditlogResponse>> getBySearchParams(®RequestParam("id") UUID id) {
+        return directory.findById(new ReadAuditlogByIdQuery(id))
+            .map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());       
+    }
+            */

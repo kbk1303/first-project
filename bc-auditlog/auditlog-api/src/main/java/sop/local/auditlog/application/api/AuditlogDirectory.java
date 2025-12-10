@@ -2,8 +2,10 @@ package sop.local.auditlog.application.api;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import sop.local.auditlog.application.api.dto.*;
+import sop.local.enums.AuditSeverity;
 
 public interface AuditlogDirectory {
     CreatedAuditlogResult createAuditlog(CreateAuditlogCmd cmd);
@@ -11,6 +13,7 @@ public interface AuditlogDirectory {
     List<AuditlogResponse> findByUserIdentifier(ReadAuditlogByUserIdentifierQuery query);
     List<AuditlogResponse> findByAuditSeverity(ReadAuditlogBySeverityQuery query);
     List<AuditlogResponse> findAll();
+    List<AuditlogResponse> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity);
 
 
 
