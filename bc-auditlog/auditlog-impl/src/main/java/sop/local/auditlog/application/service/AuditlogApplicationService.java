@@ -29,7 +29,7 @@ import sop.local.enums.AuditSeverity;
 public class AuditlogApplicationService implements AuditlogDirectory {
 
     private final AuditlogDomain domain;
-    List<AuditlogResponse> resps;
+    private final List<AuditlogResponse> resps;
 
     AuditlogApplicationService(AuditlogDomain domain) {
         this.domain = domain;
@@ -66,7 +66,7 @@ public class AuditlogApplicationService implements AuditlogDirectory {
         Optional<AuditlogResponse> resp = findAll().stream()
             .filter(r -> r.id().equals(query.id()))
             .findFirst();
-        return query.id().equals(resp.get().id()) ?  resp: Optional.empty();
+        return (!resp.isEmpty() && query.id().equals(resp.get().id())) ?  resp: Optional.empty();
     }
 
     @Override
