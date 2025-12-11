@@ -53,20 +53,18 @@ public class AuditlogController {
     }
 
 
-    /* public GET by parameters /api/auditlogs?id=... */
+    /* public GET by parameters /api/auditlogs?id=XXX */
     @GetMapping(produces="application/json")
     public ResponseEntity<List<AuditlogResponse>> findBySearchParams(
         @RequestParam(name="id", required = false) UUID id,
-        @RequestParam(name="userIdentifier", required = false) String userIdentifier,
+        @RequestParam(name="user", required = false) String userIdentifier,
         @RequestParam(name="severity", required = false) AuditSeverity severity) 
     {
         if(id == null && userIdentifier == null && severity == null) {
             return ResponseEntity.ok(directory.findAll());
-
         }
-        else {
-            return ResponseEntity.ok(directory.findBySearchParams(id, userIdentifier, severity));
-        }
+        return ResponseEntity.ok(directory.findBySearchParams(id, userIdentifier, severity));
+    
     }
         
 }

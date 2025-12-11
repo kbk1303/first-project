@@ -3,7 +3,6 @@ package sop.local.auditlog.application.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -18,8 +17,7 @@ import sop.local.auditlog.application.api.dto.AuditlogResponse;
 import sop.local.auditlog.application.api.dto.CreateAuditlogCmd;
 import sop.local.auditlog.application.api.dto.CreatedAuditlogResult;
 import sop.local.auditlog.application.api.dto.ReadAuditlogByIdQuery;
-import sop.local.auditlog.application.api.dto.ReadAuditlogBySeverityQuery;
-import sop.local.auditlog.application.api.dto.ReadAuditlogByUserIdentifierQuery;
+
 import sop.local.enums.AuditSeverity;
 
 public class AuditlogDirectoryTest {
@@ -91,32 +89,6 @@ public class AuditlogDirectoryTest {
         assertFalse(result.isPresent());
         Mockito.verify(directory, Mockito.times(1)).findById(null);
         Mockito.verifyNoMoreInteractions(directory);
-    }
-
-    @Test
-    public void unhappyPath_ReadBySeverityNotFound_shouldThrowException() {
-        Mockito.when(directory.findByAuditSeverity(Mockito.any(ReadAuditlogBySeverityQuery.class))).thenAnswer(inv -> {
-            var msg = "No enum constant sop.local.enums.AuditSeverity."+inv.getArgument(0);
-            throw new IllegalArgumentException(msg);
-        });
-        var ex = assertThrows(IllegalArgumentException.class, () -> directory.findByAuditSeverity(new ReadAuditlogBySeverityQuery(AuditSeverity.valueOf("NOT FOUND"))));
-        assertEquals(IllegalArgumentException.class, ex.getClass());
-        assertEquals("No enum constant sop.local.enums.AuditSeverity.NOT FOUND", ex.getMessage());
-        /* not verified since the Enum.valueOf is fired before the call and throws the IllegalArgumentException */
-        //Mockito.verify(directory, Mockito.times(0)).findByAuditSeverity(new ReadAuditlogBySeverityQuery(AuditSeverity.valueOf("NOT FOUND")));
-        Mockito.verifyNoMoreInteractions(directory);
-    }
-
-    @Test
-    public void happyPath_ReadByUserIdentitityNotFound_shouldReturnEmptyList() {
-        List<AuditlogResponse> resp = List.of();
-        Mockito.when(directory.findByUserIdentifier(Mockito.any(ReadAuditlogByUserIdentifierQuery.class))).thenReturn(resp);
-        List<AuditlogResponse> result  = directory.findByUserIdentifier(new ReadAuditlogByUserIdentifierQuery("KRIFDFKDERER"));
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        Mockito.verify(directory, Mockito.times(1)).findByUserIdentifier(new ReadAuditlogByUserIdentifierQuery("KRIFDFKDERER"));
-        Mockito.verifyNoMoreInteractions(directory);
-
     }
 
 }

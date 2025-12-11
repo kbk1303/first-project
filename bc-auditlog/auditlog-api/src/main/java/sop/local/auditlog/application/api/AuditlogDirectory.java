@@ -10,8 +10,6 @@ import sop.local.enums.AuditSeverity;
 public interface AuditlogDirectory {
     CreatedAuditlogResult createAuditlog(CreateAuditlogCmd cmd);
     Optional<AuditlogResponse> findById(ReadAuditlogByIdQuery query);
-    List<AuditlogResponse> findByUserIdentifier(ReadAuditlogByUserIdentifierQuery query);
-    List<AuditlogResponse> findByAuditSeverity(ReadAuditlogBySeverityQuery query);
     List<AuditlogResponse> findAll();
     List<AuditlogResponse> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity);
 

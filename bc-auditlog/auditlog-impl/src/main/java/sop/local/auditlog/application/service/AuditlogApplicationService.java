@@ -6,106 +6,89 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import sop.local.auditlog.application.api.AuditlogDirectory;
 import sop.local.auditlog.application.api.dto.AuditlogResponse;
 import sop.local.auditlog.application.api.dto.CreateAuditlogCmd;
 import sop.local.auditlog.application.api.dto.CreatedAuditlogResult;
 import sop.local.auditlog.application.api.dto.ReadAuditlogByIdQuery;
-import sop.local.auditlog.application.api.dto.ReadAuditlogBySeverityQuery;
-import sop.local.auditlog.application.api.dto.ReadAuditlogByUserIdentifierQuery;
 import sop.local.auditlog.domain.model.Auditlog;
+import sop.local.auditlog.domain.model.valueobjects.AuditlogId;
 import sop.local.auditlog.domain.model.valueobjects.UserIdentifier;
+import sop.local.auditlog.domain.ports.out.AuditlogRepositoryPort;
 import sop.local.auditlog.domain.service.AuditlogDomain;
 import sop.local.enums.AuditSeverity;
 
 /**
  * Use case service
  * 
- * outer ring but calls inntrer domain
+ * outer ring but calls inner domain
  */
 
 @Service
 public class AuditlogApplicationService implements AuditlogDirectory {
 
     private final AuditlogDomain domain;
-    private final List<AuditlogResponse> resps;
+    private final AuditlogRepositoryPort repository;
 
-    AuditlogApplicationService(AuditlogDomain domain) {
+    AuditlogApplicationService(AuditlogDomain domain, AuditlogRepositoryPort repository) {
         this.domain = domain;
-        resps = new ArrayList<>(List.of(
-                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "INESA", AuditSeverity.WARNING),
-                new AuditlogResponse(UUID.randomUUID(), "BENJ0568", AuditSeverity.ERROR),
-                new AuditlogResponse(UUID.randomUUID(), "NOAH007R", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.ERROR),
-                new AuditlogResponse(UUID.randomUUID(), "BENJ0867F", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "INESA", AuditSeverity.WARNING),
-                new AuditlogResponse(UUID.randomUUID(), "ARNE", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "KRIK4343", AuditSeverity.INFO),
-                new AuditlogResponse(UUID.randomUUID(), "REREWW222", AuditSeverity.WARNING),
-                new AuditlogResponse(UUID.randomUUID(), "KKRI", AuditSeverity.ERROR),
-                new AuditlogResponse(UUID.randomUUID(), "OLE3425D", AuditSeverity.INFO)));
+        this.repository = repository;
     }
 
+    @Transactional
     @Override
     public CreatedAuditlogResult createAuditlog(CreateAuditlogCmd cmd) {
        Auditlog log = domain.createAuditlog(new UserIdentifier(cmd.userIdentifier()), cmd.severity());
-       //System.out.println("Created auditlog: " + log.getAuditlogId().value() + ", userIdentifier: " + log.getUserIdentifier().value() + ", severity: " + log.getSeverity());
-       resps.add(new AuditlogResponse(log.getAuditlogId().value(), log.getUserIdentifier().value(), log.getSeverity()));
-
-       /* @TODO persistence missing*/
-
+       repository.save(log);
        return new CreatedAuditlogResult(log.getAuditlogId().value());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<AuditlogResponse> findById(ReadAuditlogByIdQuery query) {
-
-        /* @TODO persistence should take over */
-        Optional<AuditlogResponse> resp = findAll().stream()
-            .filter(r -> r.id().equals(query.id()))
-            .findFirst();
-        return (!resp.isEmpty() && query.id().equals(resp.get().id())) ?  resp: Optional.empty();
+        Optional<Auditlog> log = repository.findById(new AuditlogId(query.id()));
+        if(log.isEmpty()) {
+            return Optional.empty();
+        }
+        AuditlogResponse resp = new AuditlogResponse(
+            log.get().getAuditlogId().value(),
+            log.get().getUserIdentifier().value(),
+            log.get().getSeverity()
+        );
+        return Optional.ofNullable(resp);
     }
 
-    @Override
-    public List<AuditlogResponse> findByUserIdentifier(ReadAuditlogByUserIdentifierQuery query) {
-        
-        /* @TODO persistence should take over */
-                
-        return findAll().stream().filter(r -> r.userIdentifier().equals(query.userIdentifier())).toList();
 
-    }
-
-    @Override
-    public List<AuditlogResponse> findByAuditSeverity(ReadAuditlogBySeverityQuery query) {
-
-        /* @TODO persistence should take over */
-               
-        return findAll().stream().filter(r -> r.severity().equals(query.severity())).toList();
-    }
-
+    @Transactional(readOnly = true)
     @Override
     public List<AuditlogResponse> findAll() {
-            /* @TODO persistence should take over */
-            return resps;
+        List<Auditlog> logs = repository.findAll();
+        List<AuditlogResponse> responses = new ArrayList<>();
+        for(Auditlog log : logs) {
+            responses.add(new AuditlogResponse(
+                log.getAuditlogId().value(),
+                log.getUserIdentifier().value(),
+                log.getSeverity()
+            ));
+        }   
+        return responses;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<AuditlogResponse> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity) {
-        List<AuditlogResponse> allLogs = findAll();
-        if(id != null) {
-            return allLogs.stream().filter(r -> r.id().equals(id)).toList();
-        }
-        if(userIdentifier != null) {
-            allLogs =  allLogs.stream().filter(r -> r.userIdentifier().equals(userIdentifier)).toList();
-
+        List<Auditlog> logs = repository.findBySearchParams(id, userIdentifier, severity);
+        List<AuditlogResponse> responses = new ArrayList<>();
+        for(Auditlog log : logs) {
+            responses.add(new AuditlogResponse(
+                log.getAuditlogId().value(),
+                log.getUserIdentifier().value(),
+                log.getSeverity()
+            ));
         }   
-        if(severity != null) {
-            allLogs = allLogs.stream().filter(r -> r.severity().equals(severity)).toList();
-        }
-        return allLogs;
+        return responses;
     }
 
 }

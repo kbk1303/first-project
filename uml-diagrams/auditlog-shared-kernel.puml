@@ -158,49 +158,93 @@ folder "BC - Auditlog - Implementation (auditlog-impl)" #LightGreen {
       Auditlog ..> AuditSeverity : uses
 
       
-
+      package "ports" {
+        package "out" #LightGoldenRodYellow{
+          interface AuditlogRepositoryPort {
+            +save(Auditlog auditlog): Auditlog
+            +findById(AuditlogId auditlogId): Optional<Auditlog>
+            +findAll(): List<Auditlog>  
+            +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<Auditlog>
+          }
+        }
+      }
 
     }
 
-    package "application.api" {
-      package "dto" {
-        class CreateAuditlogCmd <<DTO>> {
-          -userIdentifier: String
-          -auditSeverity: AuditSeverity
-          +userIdentifier(): String
-          +auditSeverity(): AuditSeverity
-        }
-
+    package "application" {
+      package "api" {
+        package "dto" {
+          class CreateAuditlogCmd <<DTO>> {
+            -userIdentifier: String
+            -auditSeverity: AuditSeverity
+            +userIdentifier(): String
+            +auditSeverity(): AuditSeverity
+          }
           class CreatedAuditlogResult <<DTO>> {
-          -id : UUID
-          +id(): UUID
+            -id : UUID
+            +id(): UUID
+          }
+          class ReadAuditlogByIdQuery <<DTO>> {
+            -id : UUID
+            +id(): UUID
+          }
+          class ReadAuditlogByUserIdentifierQuery <<DTO>> {
+            -userIdentifier : String
+            +userIdentifier(): String
+          }
+          class AuditlogResponse <<DTO>> {
+            -id: UUID
+
+          }
+          CreateAuditlogCmd "1" ..> "1" AuditSeverity : uses
         }
-
-        class ReadAuditlogByIdQuery <<DTO>> {
-          -id : UUID
-          +id(): UUID
+        interface AuditlogDirectory {
+          +createAuditlog(CreateAuditlogCmd cmd) : CreatedAuditlogResult
+          +findById(ReadAuditlogByIdQuery query): AuditlogResponse
+          +findAll(): List<AuditlogResponse>
+          +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<AuditlogResponse>
         }
-
-        class ReadAuditlogByUserIdentifierQuery <<DTO>> {
-          -userIdentifier : String
-          +userIdentifier(): String
+        
+        
+      } 
+      package "service" {
+          class AuditlogApplicationService <<USECASE>> {
+            -domain: AuditlogDomain
+            +createAuditlog(CreateAuditlogCmd cmd) : CreatedAuditlogResult
+            +findById(ReadAuditlogByIdQuery query): Optional<AuditlogResponse>
+            +findAll(): List<AuditlogResponse>
+            +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<AuditlogResponse>
+          }
+          AuditlogApplicationService "1" ..> "1" AuditlogDirectory : implements >
+          AuditlogApplicationService "1" ..> "1" AuditlogDomain : injects >
+          AuditlogApplicationService "1" ..> "1" AuditlogRepositoryPort : injects >
         }
-
-        class AuditlogResponse <<DTO>> {
-          -id: UUID
-
-        }
-
-        CreateAuditlogCmd "1" ..> "1" AuditSeverity : uses
-      }
-      interface AuditlogDirectory {
-        +createAuditlog(CreateAuditlogCmd cmd) : CreatedAuditlogResult
-        +findById(ReadAuditlogByIdQuery query): AuditlogResponse
-
-      }
-
     }
+    package "interfaceweb" #LightGray {
+      class AuditlogController <<Controller>> {
+        -directory: AuditlogDirectory
+        +createAuditlog(CreateAuditlogCmd cmd): ResponseEntity<CreatedAuditlogResult>
+        +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): ResponseEntity<List<AuditlogResponse>>
+        +findAll(): ResponseEntity<List<AuditlogResponse>>
+      }
+      AuditlogController "1" ..> "1" AuditlogDirectory : injects >
+    }
+    package "interfaceadapters" #Yellow {
+      package "persistence" {
+        package "inmemory" {
+          class InMemoryAuditlogRepositoryImpl <<RepositoryAdapter>> {
+            -store: Map<UUID, Auditlog>
+            +save(Auditlog auditlog): Auditlog
+            +findById(AuditlogId auditlogId): Optional<Auditlog>
+            +findAll(): List<Auditlog>
+            +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<Auditlog>
+          }
+          InMemoryAuditlogRepositoryAdapter "1" ..> "1" AuditlogRepositoryPort : implements >
+        }
+        package "jpa" {
+          ' JPA implementation would go here
+        }
   }
-}
+ }
 
 @enduml
