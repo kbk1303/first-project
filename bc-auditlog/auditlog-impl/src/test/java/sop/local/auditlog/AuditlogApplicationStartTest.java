@@ -1,36 +1,37 @@
 package sop.local.auditlog;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 
-public class AuditlogApplicationStartTest {
-@Test
-void main_runs_withoutExceptions() {
-    String oldWebType   = System.getProperty("spring.main.web-application-type");
-    String oldExclude   = System.getProperty("spring.autoconfigure.exclude");
-
-    try {
-        System.setProperty("spring.main.web-application-type", "none");
-        System.setProperty(
-            "spring.autoconfigure.exclude",
-            "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
-            "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
-        );
-
+@SpringBootTest(
+    classes = AuditlogApplicationStart.class,
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    properties = {
+        "spring.main.web-application-type=none",
+        "spring.profiles.active=test",
+        "spring.datasource.url=jdbc:h2:mem:testdb",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+    }
+)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class AuditlogApplicationStartTest {
+    
+    @Test
+    void context_loads_withoutExceptions() {
+        // SpringBootTest håndterer alt korrekt
+        assertTrue(true);
+    }
+    
+    @Test  
+    void main_method_works() {
+        // Test med virkelig H2 db
         assertDoesNotThrow(() -> AuditlogApplicationStart.main(new String[0]));
-    } finally {
-        restoreProperty("spring.main.web-application-type", oldWebType);
-        restoreProperty("spring.autoconfigure.exclude", oldExclude);
     }
-}
-
-private void restoreProperty(String key, String oldValue) {
-    if (oldValue == null) {
-        System.clearProperty(key);
-    } else {
-        System.setProperty(key, oldValue);
-    }
-}
-
 }

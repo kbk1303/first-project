@@ -33,7 +33,7 @@ public class AuditlogApplicationService implements AuditlogDirectory {
     private final AuditlogDomain domain;
     private final AuditlogRepositoryPort repository;
 
-    AuditlogApplicationService(AuditlogDomain domain, @Qualifier("inMemoryAuditlogRepository") AuditlogRepositoryPort repository) {
+    AuditlogApplicationService(AuditlogDomain domain, @Qualifier("jpaAuditlogRepository") AuditlogRepositoryPort repository) {
         this.domain = domain;
         this.repository = repository;
     }
