@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import sop.local.auditlog.domain.model.Auditlog;
@@ -13,6 +14,7 @@ import sop.local.auditlog.domain.ports.out.AuditlogRepositoryPort;
 import sop.local.enums.AuditSeverity;
 
 @Repository
+@Qualifier("inMemoryAuditlogRepository")
 public class InMemoryAuditlogRepositoryImpl implements AuditlogRepositoryPort {
 
     private final List<Auditlog> auditlogs;

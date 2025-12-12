@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,7 @@ public class AuditlogApplicationService implements AuditlogDirectory {
     private final AuditlogDomain domain;
     private final AuditlogRepositoryPort repository;
 
-    AuditlogApplicationService(AuditlogDomain domain, AuditlogRepositoryPort repository) {
+    AuditlogApplicationService(AuditlogDomain domain, @Qualifier("inMemoryAuditlogRepository") AuditlogRepositoryPort repository) {
         this.domain = domain;
         this.repository = repository;
     }
