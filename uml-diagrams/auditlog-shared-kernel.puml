@@ -105,7 +105,7 @@ folder "BC - Auditlog - Implementation (auditlog-impl)" #LightGreen {
           Immutable,
           Non-empty,
           Not Null,
-          Unilogin
+          Unilogin OR "ANONYMOUS"
         end note
 
         note bottom of Description

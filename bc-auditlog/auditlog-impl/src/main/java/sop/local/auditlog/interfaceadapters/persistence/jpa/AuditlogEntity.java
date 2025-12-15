@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import sop.local.enums.AuditSeverity;
@@ -18,6 +20,7 @@ public class AuditlogEntity {
     private String userIdentifier;
 
     @Column(name = "severity", nullable = false)
+    @Enumerated(EnumType.STRING)
     private AuditSeverity severity;
 
     protected AuditlogEntity() {} // JPA requires a default constructor

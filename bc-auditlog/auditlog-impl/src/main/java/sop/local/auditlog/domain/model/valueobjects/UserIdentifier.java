@@ -5,9 +5,10 @@ import java.util.regex.Pattern;
 
 /**
  * Value Object representing the key of an Audit Log entry.
- * invariant: AuditKey must be immutable, Valid, Not Null, Unilogin.
+ * invariant: AuditKey must be immutable, Valid, Not Null, Unilogin or ANONYMOUS.
  */
 public record UserIdentifier(String value) {
+    
     public UserIdentifier {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("UserIdentifier value cannot be null or blank");
@@ -20,9 +21,10 @@ public record UserIdentifier(String value) {
     }
 
     private boolean isValid(String value) {
+         // Static pattern - kan ændres via system property hvis nødvendigt
+        String patternString = System.getProperty("organization.login.pattern"  );
         Pattern UNI_LOGIN = Pattern.compile(
-    "^[A-ZÆØÅ]{2,15}(?:\\d{2,4}|\\d{3}[A-ZÆØÅ])?$",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+         patternString,Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
         ); //unilogin regular expression
         return UNI_LOGIN.matcher(value).matches();
     }

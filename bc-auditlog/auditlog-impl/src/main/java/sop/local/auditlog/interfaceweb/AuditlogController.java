@@ -53,7 +53,7 @@ public class AuditlogController {
     }
 
 
-    /* public GET by parameters /api/auditlogs?id=XXX */
+    /* public GET by parameters /api/auditlogs?id=<UUID> */
     @GetMapping(produces="application/json")
     public ResponseEntity<List<AuditlogResponse>> findBySearchParams(
         @RequestParam(name="id", required = false) UUID id,

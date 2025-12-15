@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "organization.login.pattern",
+  "type": "java.lang.String",
+  "description": "A description for possible login user names for users in the organization, including 'ANONYMOUS'."
+}]}

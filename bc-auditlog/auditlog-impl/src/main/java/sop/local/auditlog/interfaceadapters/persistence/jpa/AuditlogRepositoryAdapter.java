@@ -28,6 +28,7 @@ public class AuditlogRepositoryAdapter implements AuditlogRepositoryPort {
     public Auditlog save(Auditlog auditlog) {
         AuditlogEntity entity = AuditlogJpaMapper.toEntity(auditlog);
         AuditlogEntity savedEntity = jpaRepository.save(entity);
+        savedEntity = jpaRepository.findById(savedEntity.getId()).orElseThrow();
         return AuditlogJpaMapper.toDomain(savedEntity);
     }
 
@@ -41,16 +42,14 @@ public class AuditlogRepositoryAdapter implements AuditlogRepositoryPort {
 
     @Override
     public List<Auditlog> findAll() {
-        List<AuditlogEntity> entities = jpaRepository.findAll();
-        return entities.stream()
-                .map(AuditlogJpaMapper::toDomain)
-                .toList();
+        return findBySearchParams(null, null, null);
     }
 
     @Override
     public Optional<Auditlog> findById(AuditlogId auditlogId) {
-        Optional<AuditlogEntity> entityOpt = jpaRepository.findById(auditlogId.value());
-        return entityOpt.map(AuditlogJpaMapper::toDomain);
+        return Optional.ofNullable(findBySearchParams(auditlogId.value(), null, null).stream()            
+                .filter(a -> a.getAuditlogId().equals(auditlogId)).findFirst()
+                .orElse(null));
     }
 
 }

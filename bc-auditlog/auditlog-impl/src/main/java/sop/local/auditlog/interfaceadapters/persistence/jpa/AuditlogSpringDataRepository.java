@@ -1,7 +1,6 @@
 package sop.local.auditlog.interfaceadapters.persistence.jpa;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,10 +18,5 @@ public interface AuditlogSpringDataRepository extends JpaRepository<AuditlogEnti
             @Param("id") UUID id,
             @Param("userIdentifier") String userIdentifier,
             @Param("severity") AuditSeverity severity);
-
-    Optional<AuditlogEntity> findById(UUID id);
-    List<AuditlogEntity> findAll();
-    List<AuditlogEntity> findByUserIdentifier(String userIdentifier);
-    List<AuditlogEntity> findBySeverity(AuditSeverity severity);
 
 }
