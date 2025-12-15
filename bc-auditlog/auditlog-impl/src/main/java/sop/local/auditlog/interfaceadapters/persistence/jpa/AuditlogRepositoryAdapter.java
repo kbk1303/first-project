@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
@@ -18,25 +17,28 @@ import sop.local.enums.AuditSeverity;
 
 public class AuditlogRepositoryAdapter implements AuditlogRepositoryPort {
 
+    
+    private final AuditlogJpaMapper mapper;
     private final AuditlogSpringDataRepository jpaRepository;
 
-    public AuditlogRepositoryAdapter(@Autowired AuditlogSpringDataRepository jpaRepository) {
+    public AuditlogRepositoryAdapter(AuditlogJpaMapper mapper, AuditlogSpringDataRepository jpaRepository) {
+        this.mapper = mapper;
         this.jpaRepository = jpaRepository;
     }
 
     @Override
     public Auditlog save(Auditlog auditlog) {
-        AuditlogEntity entity = AuditlogJpaMapper.toEntity(auditlog);
+        AuditlogEntity entity = mapper.toEntity(auditlog);
         AuditlogEntity savedEntity = jpaRepository.save(entity);
         savedEntity = jpaRepository.findById(savedEntity.getId()).orElseThrow();
-        return AuditlogJpaMapper.toDomain(savedEntity);
+        return mapper.toDomain(savedEntity);
     }
 
     @Override
     public List<Auditlog> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity) {
         List<AuditlogEntity> entities = jpaRepository.findBySearchParams(id, userIdentifier, severity);
         return entities.stream()
-                .map(AuditlogJpaMapper::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 

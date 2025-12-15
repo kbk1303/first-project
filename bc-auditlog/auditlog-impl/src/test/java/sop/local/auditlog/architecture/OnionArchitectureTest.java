@@ -18,12 +18,12 @@ public class OnionArchitectureTest {
                 .domainModels("..domain.model", "..domain.model.valueobjects")
                 .applicationServices("..application.service", "..application.api", "..application.api.dto")
                 .domainServices("..domain.service", "..domain.ports.out..")
-                .adapter("config", "..config.security..")
+                .adapter("config", "..config", "..config.security..")
                 .adapter("interfaceweb", "..interfaceweb..")
                 .adapter("persistence", "..interfaceadapters.persistence.jpa..", "..interfaceadapters.persistence.inmemory..")
                 .adapter("security", "..security..")
                 .withOptionalLayers(true)
                 .because("The Auditlog BC must follow the Hexagonal Architecture pattern.")
                 .check(importedClasses);
-          }
+    }
 }

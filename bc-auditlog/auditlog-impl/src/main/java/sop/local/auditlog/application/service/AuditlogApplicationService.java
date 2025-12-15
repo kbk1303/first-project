@@ -16,7 +16,7 @@ import sop.local.auditlog.application.api.dto.CreatedAuditlogResult;
 import sop.local.auditlog.application.api.dto.ReadAuditlogByIdQuery;
 import sop.local.auditlog.domain.model.Auditlog;
 import sop.local.auditlog.domain.model.valueobjects.AuditlogId;
-import sop.local.auditlog.domain.model.valueobjects.UserIdentifier;
+import sop.local.auditlog.domain.model.valueobjects.UserIdentifierFactory;
 import sop.local.auditlog.domain.ports.out.AuditlogRepositoryPort;
 import sop.local.auditlog.domain.service.AuditlogDomain;
 import sop.local.enums.AuditSeverity;
@@ -32,16 +32,19 @@ public class AuditlogApplicationService implements AuditlogDirectory {
 
     private final AuditlogDomain domain;
     private final AuditlogRepositoryPort repository;
+    private final UserIdentifierFactory userIdentifierFactory;
 
-    AuditlogApplicationService(AuditlogDomain domain, @Qualifier("jpaAuditlogRepository") AuditlogRepositoryPort repository) {
+    AuditlogApplicationService(AuditlogDomain domain, @Qualifier("jpaAuditlogRepository") AuditlogRepositoryPort repository,
+     UserIdentifierFactory userIdentifierFactory) {
         this.domain = domain;
         this.repository = repository;
+        this.userIdentifierFactory = userIdentifierFactory;
     }
 
     @Transactional
     @Override
     public CreatedAuditlogResult createAuditlog(CreateAuditlogCmd cmd) {
-       Auditlog log = domain.createAuditlog(new UserIdentifier(cmd.userIdentifier()), cmd.severity());
+       Auditlog log = domain.createAuditlog(userIdentifierFactory.create(cmd.userIdentifier()), cmd.severity());
        repository.save(log);
        return new CreatedAuditlogResult(log.getAuditlogId().value());
     }
