@@ -65,6 +65,12 @@ public class InMemoryAuditlogRepositoryImpl implements AuditlogRepositoryPort {
                 .findFirst();
         return (!log.isEmpty()) ? log : Optional.empty();
     }
+
+    @Override
+    public int anonymizeUserForLogs(List<UUID> ids) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'anonymizeUserForLogs'");
+    }
     
 
 }

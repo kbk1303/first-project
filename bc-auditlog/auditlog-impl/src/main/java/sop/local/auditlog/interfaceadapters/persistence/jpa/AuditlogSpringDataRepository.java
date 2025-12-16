@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,5 +19,9 @@ public interface AuditlogSpringDataRepository extends JpaRepository<AuditlogEnti
             @Param("id") UUID id,
             @Param("userIdentifier") String userIdentifier,
             @Param("severity") AuditSeverity severity);
+        
+    @Modifying
+    @Query("UPDATE AuditlogEntity a SET a.userIdentifier = 'ANONYMOUS' WHERE a.id IN :ids")
+    int anonymizeUserForLogs(@Param("ids") List<UUID> ids);
 
 }

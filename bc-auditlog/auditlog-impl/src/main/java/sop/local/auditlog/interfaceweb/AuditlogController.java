@@ -24,6 +24,8 @@ import sop.local.enums.AuditSeverity;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController
@@ -65,6 +67,14 @@ public class AuditlogController {
         }
         return ResponseEntity.ok(directory.findBySearchParams(id, userIdentifier, severity));
     
+    }
+
+    @PutMapping(produces="application/json")
+    public ResponseEntity<String> anonymizResponseEntity(@RequestParam("user") String userIdentifier) {
+        //TODO: process PUT request
+        int records = directory.setUserlogsToAnonymous(userIdentifier);
+        String responseMessage = "Anonymized " + records + " audit log records for user: " + userIdentifier;
+        return ResponseEntity.ok(responseMessage);
     }
         
 }

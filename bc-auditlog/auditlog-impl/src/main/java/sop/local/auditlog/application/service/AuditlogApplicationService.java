@@ -95,4 +95,16 @@ public class AuditlogApplicationService implements AuditlogDirectory {
         return responses;
     }
 
+    @Transactional
+    @Override
+    public int setUserlogsToAnonymous(String userIdentifier) {
+        List<Auditlog> logs = repository.findBySearchParams(null, userIdentifier, null);
+        return repository.anonymizeUserForLogs(
+            logs.stream()
+                .map(a -> a.getAuditlogId().value())
+                .toList()
+        );  
+    }
+
+
 }

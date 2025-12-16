@@ -12,6 +12,7 @@ public interface AuditlogDirectory {
     Optional<AuditlogResponse> findById(ReadAuditlogByIdQuery query);
     List<AuditlogResponse> findAll();
     List<AuditlogResponse> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity);
+    int setUserlogsToAnonymous(String userIdentifier);
 
 
 

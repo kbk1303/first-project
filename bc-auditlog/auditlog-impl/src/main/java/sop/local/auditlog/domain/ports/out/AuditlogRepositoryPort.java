@@ -13,4 +13,5 @@ public interface AuditlogRepositoryPort {
     List<Auditlog> findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity);
     List<Auditlog> findAll();
     Optional<Auditlog> findById(AuditlogId auditlogId);
+    int anonymizeUserForLogs(List<UUID> ids);
 }

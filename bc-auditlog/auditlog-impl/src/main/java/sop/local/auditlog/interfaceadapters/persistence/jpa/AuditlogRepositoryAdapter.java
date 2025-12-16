@@ -54,4 +54,9 @@ public class AuditlogRepositoryAdapter implements AuditlogRepositoryPort {
                 .orElse(null));
     }
 
+    @Override
+    public int anonymizeUserForLogs(List<UUID> ids) {
+        return jpaRepository.anonymizeUserForLogs(ids);
+    }
+
 }
