@@ -3,7 +3,9 @@ package sop.local.auditlog.domain.model.valueobjects;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserIdentifierFactory {
     private final Pattern uniLoginPattern;
 
@@ -11,8 +13,7 @@ public class UserIdentifierFactory {
         if (patternString == null || patternString.isBlank()) {
             throw new IllegalArgumentException("patternString cannot be null or blank");
         }
-        this.uniLoginPattern = Pattern.compile(
-                patternString,
+        this.uniLoginPattern = Pattern.compile(patternString,
                 Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
         );
     }
