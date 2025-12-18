@@ -71,7 +71,6 @@ public class AuditlogController {
 
     @PutMapping(produces="application/json")
     public ResponseEntity<String> anonymizResponseEntity(@RequestParam("user") String userIdentifier) {
-        //TODO: process PUT request
         int records = directory.setUserlogsToAnonymous(userIdentifier);
         String responseMessage = "Anonymized " + records + " audit log records for user: " + userIdentifier;
         return ResponseEntity.ok(responseMessage);
