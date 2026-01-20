@@ -54,7 +54,8 @@ folder "BC - Auditlog - Implementation (auditlog-impl)" #LightGreen {
 
 
   ' ===================== AUDITLOG DOMAIN (IMPL) =====================
-  package "sop.local.auditlog" {
+  package "sop.local.auditlog" 
+  {
     package "domain" #LightCoral {
       package "model" {
 
@@ -243,6 +244,31 @@ folder "BC - Auditlog - Implementation (auditlog-impl)" #LightGreen {
         }
         package "jpa" {
           ' JPA implementation would go here
+          interface JpaAuditlogRepository <<JPARepository>> #LightSteelBlue {
+            +save(Auditlog auditlog): Auditlog
+            +findById(AuditlogId auditlogId): Optional<Auditlog>
+            +findAll(): List<Auditlog>
+            +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<Auditlog>
+          }
+          class AuditlogJpaMapper {
+            +toEntity(Auditlog auditlog): AuditlogEntity
+            +toDomain(AuditlogEntity entity): Auditlog
+          }
+          class AuditlogRepositoryAdapter {
+            -jpaRepository: JpaAuditlogRepository
+            -mapper: AuditlogJpaMapper
+            +save(Auditlog auditlog): Auditlog
+            +findById(AuditlogId auditlogId): Optional<Auditlog>
+            +findAll(): List<Auditlog>
+            +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<Auditlog>
+          }
+          interface AuditlogSpringDataRepository <<SpringDataRepository>> {
+            +save(AuditlogEntity entity): AuditlogEntity
+            +findById(UUID id): Optional<AuditlogEntity>
+            +findAll(): List<AuditlogEntity>
+            +findBySearchParams(UUID id, String userIdentifier, AuditSeverity severity): List<AuditlogEntity>
+          }
+          AuditlogSpringDataRepository "1" ..> "1" JpaAuditlogRepository : implements >
         }
   }
  }
